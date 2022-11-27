@@ -19,7 +19,7 @@ light_loop = LightLoop()
 light_string = LightString()
 
 
-@app.route("/turnOffLights/", methods=['POST'])
+@app.route("/turnOffLights/", methods=['GET'])
 def turn_off_lights():
     """Handler to turn off the lights."""
     # type: (HandlerInput) -> Response
