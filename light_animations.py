@@ -25,9 +25,6 @@ class LightString:
 
         self.ONE_SECOND_IN_MILLISECONDS = 1000
         self.MAX_COLOR_VALUE = 256
-        self.LEFT_SIDE_PIXELS = [i for i in range(32)]
-        self.TOP_PIXELS = [i for i in range(33, 66)]
-        self.RIGHT_SIDE_PIXELS = [i for i in range(67, 100)]
 
         # Create PixelStrip object with appropriate configuration.
         self.strip = PixelStrip(

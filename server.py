@@ -19,7 +19,7 @@ light_loop = LightLoop()
 light_string = LightString()
 
 
-@app.route("/setPattern/turnOffLights/", methods=['GET', 'POST'])
+@app.route("/turnOffLights/", methods=['POST'])
 def turn_off_lights():
     """Handler to turn off the lights."""
     # type: (HandlerInput) -> Response
@@ -54,12 +54,20 @@ def turn_off_lights():
 
 
 @app.route("/setPattern/slowRandomTransition/", methods=['GET', 'POST'])
-def randomly_transition_between_colors():
+def slow_randomly_transition_between_colors():
     """Handler to turn the string random colors."""
     light_loop.set_looping_pattern(
         light_string.transition_to_random_color, {"wait_after_transition_ms": 1}
     )
     return FlaskResponse("Changing to slowRandomTransition", status=202)
+
+@app.route("/setPattern/fastRandomTransition/", methods=['GET', 'POST'])
+def fast_randomly_transition_between_colors():
+    """Handler to turn the string random colors."""
+    light_loop.set_looping_pattern(
+        light_string.transition_to_random_color, {"transition_time_ms": 100,"wait_after_transition_ms": 1}
+    )
+    return FlaskResponse("Changing to fastRandomTransition", status=202)
 
 
 
