@@ -344,5 +344,3 @@ class LightString:
 
         return [r, g, b]
 
-
-light_string = LightString()
