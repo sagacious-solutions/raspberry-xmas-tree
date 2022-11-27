@@ -20,14 +20,11 @@ light_string = LightString()
 
 
 @app.route("/setPattern/turnOffLights/", methods=['GET', 'POST'])
-def turn_off_lights(handler_input):
+def turn_off_lights():
     """Handler to turn off the lights."""
     # type: (HandlerInput) -> Response
-    speech_text = "Turning off the lights."
     light_loop.set_static_lights(light_string.set_solid, {"color": LedColor.black})
     return FlaskResponse("Turned off lights.", status=202)
-    return handler_input.response_builder.speak(speech_text).set_should_end_session(
-        True).response
 
 
 
