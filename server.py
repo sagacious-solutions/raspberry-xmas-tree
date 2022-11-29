@@ -1,6 +1,6 @@
 import logging
 
-from flask import Flask
+from flask import Flask, request
 from flask import Response as FlaskResponse
 from flask_cors import CORS
 
@@ -16,22 +16,19 @@ logger.setLevel(logging.DEBUG)
 
 # Create server and set allowed domain origins
 app = Flask(__name__)
-cors = CORS(app, resources={r"/*": {"origins": config.secrets["CORS_ALLOWED_DOMAINS"]}})
+cors = CORS(app, origins=config.secrets["CORS_ALLOWED_DOMAINS"])
 
 light_loop = LightLoop()
 light_string = LightString()
 
 
-@app.route("/turnOffLights/", methods=['GET'])
+@app.route("/turnOffLights/", methods=["POST"])
 def turn_off_lights():
     """Handler to turn off the lights."""
-    # type: (HandlerInput) -> Response
-    light_loop.set_static_lights(light_string.set_solid, {"color": LedColor.black})
+    light_loop.set_static_lights(
+        light_string.set_solid, {"color": LedColor.black}
+    )
     return FlaskResponse("Turned off lights.", status=202)
-
-
-
-
 
 
 # @sb.request_handler(can_handle_func=is_intent_name("slowRainbowTheaterChaseIntent"))
@@ -44,8 +41,6 @@ def turn_off_lights():
 #         True).response
 
 
-
-
 # @sb.request_handler(can_handle_func=is_intent_name("solidRandomIntent"))
 # def random_solid_intent(handler_input):
 #     """Handler to turn the string random colors."""
@@ -56,36 +51,63 @@ def turn_off_lights():
 #         True).response
 
 
-@app.route("/setPattern/slowRandomTransition/", methods=['GET', 'POST'])
-def slow_randomly_transition_between_colors():
-    """Handler to turn the string random colors."""
-    light_loop.set_looping_pattern(
-        light_string.transition_to_random_color, 
-        {"wait_after_transition_ms": 1}
-    )
-    return FlaskResponse("Changing to slowRandomTransition", status=202)
+# @app.route("/setPattern/slowRandomTransition/", methods=['GET', 'POST'])
+# def slow_randomly_transition_between_colors():
+#     """Handler to turn the string random colors."""
+#     light_loop.set_looping_pattern(
+#         light_string.transition_to_random_color,
+#         {"wait_after_transition_ms": 1}
+#     )
+#     return FlaskResponse("Changing to slowRandomTransition", status=202)
 
-@app.route("/setPattern/fastRandomTransition/", methods=['GET', 'POST'])
-def fast_randomly_transition_between_colors():
-    """Handler to turn the string random colors."""
-    light_loop.set_looping_pattern(
-        light_string.transition_to_random_color, 
-        {"transition_time_ms": 100,"wait_after_transition_ms": 1}
-    )
-    return FlaskResponse("Changing to fastRandomTransition", status=202)
+# @app.route("/setPattern/fastRandomTransition/", methods=['GET', 'POST'])
+# def fast_randomly_transition_between_colors():
+#     """Handler to turn the string random colors."""
+#     light_loop.set_looping_pattern(
+#         light_string.transition_to_random_color,
+#         {"transition_time_ms": 100,"wait_after_transition_ms": 1}
+#     )
+#     return FlaskResponse("Changing to fastRandomTransition", status=202)
 
-
+pattern_fn_map = {
+    "rainbowCycle": {"fn": light_string.rainbow_cycle},
+    "slowRandomTransition": {
+        "fn": light_string.transition_to_random_color,
+        "kwargs": {"wait_after_transition_ms": 1},
+    },
+}
+pattern_fn_map = {
+    "rainbowCycle": {"fn": light_string.rainbow_cycle},
+    "slowRandomTransition": {
+        "fn": light_string.transition_to_random_color,
+        "kwargs": {"wait_after_transition_ms": 1},
+    },
+    "fastRandomTransition": {
+        "fn": light_string.transition_to_random_color,
+        "kwargs": {"transition_time_ms": 100, "wait_after_transition_ms": 1},
+    },
+}
 
 # Register your intent handlers to the skill_builder object
-@app.route("/setPattern/rainbowCycle/", methods=['GET', 'POST'])
-def rainbow_cycle():
-    """Handler for setRainbowChaseIntent Intent."""
-    # type: (HandlerInput) -> Response
-    light_loop.set_looping_pattern(light_string.rainbow_cycle)
-    return FlaskResponse("Starting Rainbow Cycle", status=202)
+@app.route("/setPattern/", methods=["POST"])
+def set_pattern():
+
+    data = request.json
+    pattern = data.get("pattern")
+    if not pattern or pattern not in pattern_fn_map.keys():
+        return FlaskResponse("Missing or Invalid Pattern", status=404)
+
+    pattern_fn = pattern_fn_map.get(pattern)
+    light_loop.set_looping_pattern(
+        pattern_fn.get("fn"),
+        pattern_fn.get("kwargs", {}),
+    )
+    return FlaskResponse(
+        f"Set to lighting pattern {request.json['pattern']}", status=200
+    )
 
 
-@app.route("/test/", methods=['GET', 'POST'])
+@app.route("/test/", methods=["GET", "POST"])
 def test_turn_yellow():
     light_loop.set_static_lights(light_string.random_colors)
 
@@ -98,5 +120,4 @@ if __name__ == "__main__":
         port=5000,
         # Run on all IPs
         host="0.0.0.0",
-        # ssl_context=(config.https_cert, config.https_key)
     )

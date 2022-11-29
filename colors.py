@@ -23,9 +23,7 @@ class LedColor:
 
     def get_random():
         colors = [
-            value
-            for key, value in LedColor.__dict__.items()
-            if type(value) == int
+            value for key, value in LedColor.__dict__.items() if type(value) == int
         ]
         index = round(random.random() * len(colors)) - 1
 

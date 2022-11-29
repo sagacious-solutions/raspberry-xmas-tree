@@ -17,9 +17,7 @@ class LightString:
         LED_FREQ_HZ = 800000  # LED signal frequency in hertz (usually 800khz)
         LED_DMA = 10  # DMA channel to use for generating signal (try 10)
         LED_BRIGHTNESS = 255  # Set to 0 for darkest and 255 for brightest
-        LED_INVERT = (
-            False  # True to invert the signal (when using NPN transistor
-        )
+        LED_INVERT = False  # True to invert the signal (when using NPN transistor
         #  level shift)
         LED_CHANNEL = 0
 
@@ -77,9 +75,7 @@ class LightString:
         half = int(self.strip.numPixels() / 2)
         for i in range(half):
             self.strip.setPixelColor(0 + i, LedColor.get_random())
-            self.strip.setPixelColor(
-                self.strip.numPixels() - i, LedColor.get_random()
-            )
+            self.strip.setPixelColor(self.strip.numPixels() - i, LedColor.get_random())
             self.strip.show()
             time.sleep(time_ms / self.ONE_SECOND_IN_MILLISECONDS)
 
@@ -117,9 +113,7 @@ class LightString:
         """
         logger.info(f"Colorwipe - Reversed:{reverse}")
         wipe_direction = (
-            (self.strip.numPixels(), 0, -1)
-            if reverse
-            else (0, self.strip.numPixels())
+            (self.strip.numPixels(), 0, -1) if reverse else (0, self.strip.numPixels())
         )
         for i in range(*wipe_direction):
             self.strip.setPixelColor(i, color)
@@ -206,31 +200,20 @@ class LightString:
             self.strip.show()
             time.sleep(wait_ms / self.ONE_SECOND_IN_MILLISECONDS)
 
-    def rainbow_cycle(
-        self, wait_ms: Optional[int] = 20, iterations: Optional[int] = 5
-    ):
+    def rainbow_cycle(self, wait_ms: Optional[int] = 20, iterations: Optional[int] = 5):
         """Draw rainbow that uniformly distributes itself across all pixels.
 
         Args:
             wait_ms (Optional[int]): Time between refreshing the string. Defaults to 20.
             iterations (Optional[int]): Amount of times to run the loop. Defaults to 5.
         """
-        logger.info(
-            f"Rainbow Cycle\nwait_ms: {wait_ms}\niterations: {iterations}"
-        )
+        logger.info(f"Rainbow Cycle\nwait_ms: {wait_ms}\niterations: {iterations}")
         for j in range(self.MAX_COLOR_VALUE * iterations):
             for i in range(self.strip.numPixels()):
                 self.strip.setPixelColor(
                     i,
                     self.wheel(
-                        (
-                            int(
-                                i
-                                * self.MAX_COLOR_VALUE
-                                / self.strip.numPixels()
-                            )
-                            + j
-                        )
+                        (int(i * self.MAX_COLOR_VALUE / self.strip.numPixels()) + j)
                         & self.MAX_COLOR_VALUE - 1
                     ),
                 )
@@ -284,9 +267,7 @@ class LightString:
 
             time.sleep(0.001)
 
-    def transition_to_color(
-        self, new_color: Color, time_ms: Optional[int] = 1000
-    ):
+    def transition_to_color(self, new_color: Color, time_ms: Optional[int] = 1000):
         """Transition the whole light string from current color to another in
             a slow fade. This acts on whatever the current color of pixel 0 is
             rather than fading each color to the new color. So if its currently
@@ -319,9 +300,7 @@ class LightString:
                 the new color. Defaults to 0.
         """
         current_color = self.strip.getPixelColor(0)
-        self.transition_colors(
-            current_color, LedColor.get_random(), transition_time_ms
-        )
+        self.transition_colors(current_color, LedColor.get_random(), transition_time_ms)
         time.sleep(wait_after_transition_sec)
 
     @staticmethod
@@ -340,4 +319,3 @@ class LightString:
         b = color_int & 0xFF
 
         return [r, g, b]
-
