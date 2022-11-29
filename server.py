@@ -2,18 +2,21 @@ import logging
 
 from flask import Flask
 from flask import Response as FlaskResponse
+from flask_cors import CORS
 
 from colors import LedColor
 from lightloop import LightLoop
 from light_animations import LightString
-
 
 import config
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
+
+# Create server and set allowed domain origins
 app = Flask(__name__)
+cors = CORS(app, resources={r"/*": {"origins": config.secrets["CORS_ALLOWED_DOMAINS"]}})
 
 light_loop = LightLoop()
 light_string = LightString()
