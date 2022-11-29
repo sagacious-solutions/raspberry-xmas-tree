@@ -57,7 +57,8 @@ def turn_off_lights():
 def slow_randomly_transition_between_colors():
     """Handler to turn the string random colors."""
     light_loop.set_looping_pattern(
-        light_string.transition_to_random_color, {"wait_after_transition_ms": 1}
+        light_string.transition_to_random_color, 
+        {"wait_after_transition_ms": 1}
     )
     return FlaskResponse("Changing to slowRandomTransition", status=202)
 
@@ -65,7 +66,8 @@ def slow_randomly_transition_between_colors():
 def fast_randomly_transition_between_colors():
     """Handler to turn the string random colors."""
     light_loop.set_looping_pattern(
-        light_string.transition_to_random_color, {"transition_time_ms": 100,"wait_after_transition_ms": 1}
+        light_string.transition_to_random_color, 
+        {"transition_time_ms": 100,"wait_after_transition_ms": 1}
     )
     return FlaskResponse("Changing to fastRandomTransition", status=202)
 
