@@ -31,51 +31,6 @@ def turn_off_lights():
     return FlaskResponse("Turned off lights.", status=202)
 
 
-# @sb.request_handler(can_handle_func=is_intent_name("slowRainbowTheaterChaseIntent"))
-# def slow_rainbow_chase_handler(handler_input):
-#     """Handler for setRainbowChaseIntent Intent."""
-#     # type: (HandlerInput) -> Response
-#     speech_text = "Setting lights to slow Rainbow Theater Chase"
-#     light_loop.set_looping_pattern(light_string.theater_chase_rainbow, {"wait_ms": 100})
-#     return handler_input.response_builder.speak(speech_text).set_should_end_session(
-#         True).response
-
-
-# @sb.request_handler(can_handle_func=is_intent_name("solidRandomIntent"))
-# def random_solid_intent(handler_input):
-#     """Handler to turn the string random colors."""
-#     # type: (HandlerInput) -> Response
-#     speech_text = "Setting to random solid colors."
-#     light_loop.set_static_lights(light_string.random_colors)
-#     return handler_input.response_builder.speak(speech_text).set_should_end_session(
-#         True).response
-
-
-# @app.route("/setPattern/slowRandomTransition/", methods=['GET', 'POST'])
-# def slow_randomly_transition_between_colors():
-#     """Handler to turn the string random colors."""
-#     light_loop.set_looping_pattern(
-#         light_string.transition_to_random_color,
-#         {"wait_after_transition_ms": 1}
-#     )
-#     return FlaskResponse("Changing to slowRandomTransition", status=202)
-
-# @app.route("/setPattern/fastRandomTransition/", methods=['GET', 'POST'])
-# def fast_randomly_transition_between_colors():
-#     """Handler to turn the string random colors."""
-#     light_loop.set_looping_pattern(
-#         light_string.transition_to_random_color,
-#         {"transition_time_ms": 100,"wait_after_transition_ms": 1}
-#     )
-#     return FlaskResponse("Changing to fastRandomTransition", status=202)
-
-pattern_fn_map = {
-    "rainbowCycle": {"fn": light_string.rainbow_cycle},
-    "slowRandomTransition": {
-        "fn": light_string.transition_to_random_color,
-        "kwargs": {"wait_after_transition_ms": 1},
-    },
-}
 pattern_fn_map = {
     "rainbowCycle": {"fn": light_string.rainbow_cycle},
     "slowRandomTransition": {
@@ -88,10 +43,28 @@ pattern_fn_map = {
     },
 }
 
+
+@app.route("/setSolidPreset/", methods=["POST"])
+def set_solid():
+    data = request.json
+    color = data.get("color")
+    led_color = getattr(LedColor, color)
+    print(f"The color is : {color}")
+    print(f"The led_color is : {led_color}")
+    if not led_color:
+        return FlaskResponse(
+            f"No valid preset color found for {color}", status=401
+        )
+
+    light_loop.set_static_lights(
+        light_string.set_solid, {"color": led_color}
+    )
+    return FlaskResponse(f"Set lights to color {color}", status=202)
+
+
 # Register your intent handlers to the skill_builder object
 @app.route("/setPattern/", methods=["POST"])
 def set_pattern():
-
     data = request.json
     pattern = data.get("pattern")
     if not pattern or pattern not in pattern_fn_map.keys():
