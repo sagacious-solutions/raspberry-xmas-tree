@@ -49,15 +49,27 @@ def set_solid():
     data = request.json
     color = data.get("color")
     led_color = getattr(LedColor, color)
-    print(f"The color is : {color}")
-    print(f"The led_color is : {led_color}")
     if not led_color:
         return FlaskResponse(
             f"No valid preset color found for {color}", status=401
         )
 
+    light_loop.set_static_lights(light_string.set_solid, {"color": led_color})
+    return FlaskResponse(f"Set lights to color {color}", status=202)
+
+
+@app.route("/setRgbColor/", methods=["POST"])
+def set_rgb_color():
+    data = request.json
+    color = data.get("color")
+    print(f"PING!! - {color}")
+    if not type(color) == list or len(color) != 3:
+        return FlaskResponse(
+            f"Improper data sent. Must be a 3 index list. {color}", status=401
+        )
+
     light_loop.set_static_lights(
-        light_string.set_solid, {"color": led_color}
+        light_string.set_solid, {"color": LedColor.rgb(color)}
     )
     return FlaskResponse(f"Set lights to color {color}", status=202)
 

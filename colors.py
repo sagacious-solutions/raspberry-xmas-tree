@@ -1,8 +1,15 @@
-from rpi_ws281x import Color
+"""Defines many preset colors for the LED Light string as well as having a couple
+    functions to define new colors.
+"""
+
+from typing import List
 import random
+
+from rpi_ws281x import Color
 
 
 class LedColor:
+    # All colors provided in GRB format instead of RGB
     black = Color(0, 0, 0)
     white = Color(255, 255, 255)
     warmWhite = Color(45, 180, 10)
@@ -19,6 +26,10 @@ class LedColor:
     fallYellow = Color(100, 255, 0)
     pink = Color(50, 255, 100)
     brightViolet = Color(10, 255, 100)
+
+    def rgb(rgb: List[int]):
+        # The ws281x library takes color in GRB format. This corrects that.
+        return Color(rgb[1], rgb[0], rgb[2])
 
     def get_random():
         colors = [
