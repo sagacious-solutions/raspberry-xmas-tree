@@ -62,7 +62,6 @@ def set_solid():
 def set_rgb_color():
     data = request.json
     color = data.get("color")
-    print(f"PING!! - {color}")
     if not type(color) == list or len(color) != 3:
         return FlaskResponse(
             f"Improper data sent. Must be a 3 index list. {color}", status=401
