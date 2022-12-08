@@ -1,8 +1,10 @@
+from typing import List
 import logging
 
 from flask import Flask, request
 from flask import Response as FlaskResponse
 from flask_cors import CORS
+import socketio
 
 from colors import LedColor
 from lightloop import LightLoop
@@ -10,21 +12,43 @@ from light_animations import LightString
 
 import config
 
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
-
+log = config.log
 
 # Create server and set allowed domain origins
+sio = socketio.Server(
+    logger=True, async_mode='eventlet', cors_allowed_origins="*"
+)
 app = Flask(__name__)
 cors = CORS(app, origins=config.secrets["CORS_ALLOWED_DOMAINS"])
+app.wsgi_app = socketio.WSGIApp(sio, app.wsgi_app)
+
 
 light_loop = LightLoop()
 light_string = LightString()
 
+@sio.event
+def connect(*args):
+    """Logs a message on new client connections."""
+    log.info("New client connected.")
+
+@sio.event
+def set_color(_sid, color: List[int]):
+    """Sets the color to the one provided in the message
+
+    Args:
+        color (List[int]): Color to set tree
+    """
+    light_loop.set_static_lights(
+        light_string.set_solid, {"color": LedColor.rgb(color)}
+    )    
 
 @app.route("/turnOffLights/", methods=["POST"])
 def turn_off_lights():
-    """Handler to turn off the lights."""
+    """sets all pixels on tree to black
+
+    Returns:
+        FlaskResponse: Positive HTTP Response
+    """
     light_loop.set_static_lights(
         light_string.set_solid, {"color": LedColor.black}
     )
@@ -51,6 +75,7 @@ def set_solid():
     data = request.json
     color = data.get("color")
     led_color = getattr(LedColor, color)
+    log.info(f"Setting color to {color}")
     if not led_color:
         return FlaskResponse(
             f"No valid preset color found for {color}", status=401
@@ -64,7 +89,6 @@ def set_solid():
 def set_rgb_color():
     data = request.json
     color = data.get("color")
-    print(f"PING!! - {color}")
     if not type(color) == list or len(color) != 3:
         return FlaskResponse(
             f"Improper data sent. Must be a 3 index list. {color}", status=401
@@ -102,9 +126,16 @@ def test_turn_yellow():
 
 
 if __name__ == "__main__":
-    app.run(
-        # Port in use by tunnel
-        port=5000,
-        # Run on all IPs
-        host="0.0.0.0",
-    )
+
+    # deploy with eventlet
+    import eventlet
+    import eventlet.wsgi
+
+    eventlet.wsgi.server(eventlet.listen(("", 5000)), app)
+    # app.run(
+    #     threaded=True,
+    #     # Port in use by tunnel
+    #     port=5000,
+    #     # Run on all IPs
+    #     host="0.0.0.0",
+    # )
