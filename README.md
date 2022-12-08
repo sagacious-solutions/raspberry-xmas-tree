@@ -11,8 +11,7 @@ This is a repository for my Christmas Tree. Utilizing a Raspberry Pi and a ws281
  - Socket.io
  - A ws2811 IC RGB Light String
  - A Douglas Fir Tree
- - Ender 3 Pro V2 for Printing Screen Mount
- - Fusion 360 for Parts Design
+
 
 ### To Get Running
 
