@@ -55,6 +55,7 @@ def turn_off_lights():
     return FlaskResponse("Turned off lights.", status=202)
 
 
+# Function and arguments for setPattern endpoint
 pattern_fn_map = {
     "rainbowCycle": {"fn": light_string.rainbow_cycle},
     "slowRandomTransition": {
@@ -68,6 +69,7 @@ pattern_fn_map = {
 }
 
 
+# Sets color to an existing mapped preset color
 @app.route("/setSolidPreset/", methods=["POST"])
 def set_solid():
     data = request.json
@@ -98,7 +100,7 @@ def set_rgb_color():
     return FlaskResponse(f"Set lights to color {color}", status=202)
 
 
-# Register your intent handlers to the skill_builder object
+# Starts an animated pattern
 @app.route("/setPattern/", methods=["POST"])
 def set_pattern():
     data = request.json
@@ -115,7 +117,7 @@ def set_pattern():
         f"Set to lighting pattern {request.json['pattern']}", status=200
     )
 
-
+# Simple test endpoint for debugging
 @app.route("/test/", methods=["GET", "POST"])
 def test_turn_yellow():
     light_loop.set_static_lights(light_string.random_colors)
