@@ -2,6 +2,17 @@
 
 This is a repository for my Christmas Tree. Utilizing a Raspberry Pi and a ws281x RGB Light string, we are able to control my Christmas Tree's RGB lights from a React Touch Screen interface.
 
+# Tech-Stack
+ - Raspberry Pi
+ - Debian Linux
+ - Python
+ - Flask
+ - python-dotenv
+ - Socket.io
+ - A ws2811 IC RGB Light String
+ - A Douglas Fir Tree
+
+
 ### To Get Running
 
 1) Install the required libraries ```sudo pip install -r requirements.txt```
