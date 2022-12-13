@@ -42,6 +42,7 @@ def set_color(_sid, color: List[int]):
         light_string.set_solid, {"color": LedColor.rgb(color)}
     )    
 
+
 @app.route("/turnOffLights/", methods=["POST"])
 def turn_off_lights():
     """sets all pixels on tree to black
@@ -83,6 +84,21 @@ def set_solid():
 
     light_loop.set_static_lights(light_string.set_solid, {"color": led_color})
     return FlaskResponse(f"Set lights to color {color}", status=202)
+
+@app.route("/setCustomPattern/", methods=["POST"])
+def set_custom_pattern():
+    """sets all pixels on tree to black
+
+    Returns:
+        FlaskResponse: Positive HTTP Response
+    """
+    data = request.json
+    pattern = data.get("pattern")
+    log.info(pattern)
+    light_loop.set_static_lights(
+        light_string.set_solid_from_rgb_list, {"rgb_list": pattern}
+    )
+    return FlaskResponse("Set to custom pattern", status=202)
 
 
 @app.route("/setRgbColor/", methods=["POST"])
@@ -139,10 +155,3 @@ if __name__ == "__main__":
     import eventlet.wsgi
 
     eventlet.wsgi.server(eventlet.listen(("", 5000)), app)
-    # app.run(
-    #     threaded=True,
-    #     # Port in use by tunnel
-    #     port=5000,
-    #     # Run on all IPs
-    #     host="0.0.0.0",
-    # )
