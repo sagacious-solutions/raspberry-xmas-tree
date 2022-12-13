@@ -4,15 +4,12 @@ import time
 from rpi_ws281x import Color, PixelStrip
 from colors import LedColor
 
-from simple_logging import get_basic_logger
-
-logger = get_basic_logger()
-
+from config import log 
 
 class LightString:
     def __init__(self) -> None:
         # LED strip configuration:
-        LED_COUNT = 200  # Number of LED pixels.
+        self.LED_COUNT = 200  # Number of LED pixels.
         LED_PIN = 18  # GPIO pin connected to the pixels (must support PWM!).
         LED_FREQ_HZ = 800000  # LED signal frequency in hertz (usually 800khz)
         LED_DMA = 10  # DMA channel to use for generating signal (try 10)
@@ -28,7 +25,7 @@ class LightString:
 
         # Create PixelStrip object with appropriate configuration.
         self.strip = PixelStrip(
-            LED_COUNT,
+            self.LED_COUNT,
             LED_PIN,
             LED_FREQ_HZ,
             LED_DMA,
@@ -37,6 +34,19 @@ class LightString:
             LED_CHANNEL,
         )
         self.strip.begin()
+
+    def set_solid_from_rgb_list(self, rgb_list: List[List[int]]):
+        """Takes a list of RGB Values and repeats the list of values over the string of 
+            lights
+
+        Args:
+            rgb_list (List[List[int]]): List of list of integers representing RGB Values
+        """
+        for pixel_n in range(self.LED_COUNT):
+            color = LedColor.rgb(rgb_list[pixel_n % len(rgb_list)])
+            self.strip.setPixelColor(pixel_n, color)
+
+        self.strip.show()        
 
     def set_color_for_pixels(self, pixel_list: List[int], color: Color):
         """Sets every pixel in the provided list to the given color
@@ -59,7 +69,7 @@ class LightString:
             wait_ms (int, optional): how many milliseconds between changing each pixel.
                 Defaults to 50.
         """
-        logger.info("color_wipe_inside_out_reversed")
+        log.info("color_wipe_inside_out_reversed")
         half = int(self.strip.numPixels() / 2)
         for i in range(half):
             self.strip.setPixelColor(0 + i, color)
@@ -73,7 +83,7 @@ class LightString:
         Args:
             time_ms (Optional[int]): Time in ms between pixel changes. Defaults to 50.
         """
-        logger.info("Setting string to random colors.")
+        log.info("Setting string to random colors.")
         half = int(self.strip.numPixels() / 2)
         for i in range(half):
             self.strip.setPixelColor(0 + i, LedColor.get_random())
@@ -93,7 +103,7 @@ class LightString:
             color (Color): _description_
             wait_ms (int, optional): _description_. Defaults to 50.
         """
-        logger.info("color_wipe_inside_out")
+        log.info("color_wipe_inside_out")
         half = int(self.strip.numPixels() / 2)
         for i in range(half):
             self.strip.setPixelColor(half - i, color)
@@ -115,7 +125,7 @@ class LightString:
             reverse (bool, optional): When True, goes from the right side to the left
                 instead of vice versa. Defaults to False.
         """
-        logger.info(f"Colorwipe - Reversed:{reverse}")
+        log.info(f"Colorwipe - Reversed:{reverse}")
         wipe_direction = (
             (self.strip.numPixels(), 0, -1)
             if reverse
@@ -132,7 +142,7 @@ class LightString:
         Args:
             color (Color): New color to change too
         """
-        logger.info("Setting to solid color")
+        log.info("Setting to solid color")
 
         for i in range(self.strip.numPixels()):
             self.strip.setPixelColor(i, color)
@@ -154,7 +164,7 @@ class LightString:
             iterations (Optional[int]): How many time to run the animation.
                 Defaults to 10.
         """
-        logger.info("Running theater chase")
+        log.info("Running theater chase")
         for _ in range(iterations):
             for q in range(3):
                 for i in range(0, self.strip.numPixels(), 3):
@@ -197,7 +207,7 @@ class LightString:
             iterations (Optional[int]): How many times to run through a color
                 loop. Defaults to 1.
         """
-        logger.info(f"Rainbow\nwait_ms: {wait_ms}\niterations: {iterations}")
+        log.info(f"Rainbow\nwait_ms: {wait_ms}\niterations: {iterations}")
         for j in range(self.MAX_COLOR_VALUE * iterations):
             for i in range(self.strip.numPixels()):
                 self.strip.setPixelColor(
@@ -215,7 +225,7 @@ class LightString:
             wait_ms (Optional[int]): Time between refreshing the string. Defaults to 20.
             iterations (Optional[int]): Amount of times to run the loop. Defaults to 5.
         """
-        logger.info(
+        log.info(
             f"Rainbow Cycle\nwait_ms: {wait_ms}\niterations: {iterations}"
         )
         for j in range(self.MAX_COLOR_VALUE * iterations):
