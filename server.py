@@ -124,6 +124,13 @@ def test_turn_yellow():
 
     return FlaskResponse("Test Received!!", status=202)
 
+# Simple test endpoint for debugging
+@app.route("/bonjour/", methods=["GET"])
+def bonjour_to_web_server():
+    light_loop.set_static_lights(light_string.random_colors)
+
+    return FlaskResponse("BONJOUR!", status=202)
+
 
 if __name__ == "__main__":
 
