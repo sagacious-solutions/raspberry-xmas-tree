@@ -4,12 +4,13 @@ import time
 from rpi_ws281x import Color, PixelStrip
 from colors import LedColor
 
-from config import log 
+from config import log
 
 class LightString:
-    def __init__(self) -> None:
+    def __init__(self, led_count: int = 100, color_mode="rgb") -> None:
         # LED strip configuration:
-        self.LED_COUNT = 200  # Number of LED pixels.
+        self.LED_COUNT = led_count  # Number of LED pixels.
+        self.color_mode = color_mode
         LED_PIN = 18  # GPIO pin connected to the pixels (must support PWM!).
         LED_FREQ_HZ = 800000  # LED signal frequency in hertz (usually 800khz)
         LED_DMA = 10  # DMA channel to use for generating signal (try 10)
@@ -19,9 +20,9 @@ class LightString:
         )
         #  level shift)
         LED_CHANNEL = 0
-
         self.ONE_SECOND_IN_MILLISECONDS = 1000
         self.MAX_COLOR_VALUE = 256
+
 
         # Create PixelStrip object with appropriate configuration.
         self.strip = PixelStrip(
@@ -36,7 +37,7 @@ class LightString:
         self.strip.begin()
 
     def set_solid_from_rgb_list(self, rgb_list: List[List[int]]):
-        """Takes a list of RGB Values and repeats the list of values over the string of 
+        """Takes a list of RGB Values and repeats the list of values over the string of
             lights
 
         Args:
@@ -46,7 +47,7 @@ class LightString:
             color = LedColor.rgb(rgb_list[pixel_n % len(rgb_list)])
             self.strip.setPixelColor(pixel_n, color)
 
-        self.strip.show()        
+        self.strip.show()
 
     def set_color_for_pixels(self, pixel_list: List[int], color: Color):
         """Sets every pixel in the provided list to the given color
@@ -225,9 +226,7 @@ class LightString:
             wait_ms (Optional[int]): Time between refreshing the string. Defaults to 20.
             iterations (Optional[int]): Amount of times to run the loop. Defaults to 5.
         """
-        log.info(
-            f"Rainbow Cycle\nwait_ms: {wait_ms}\niterations: {iterations}"
-        )
+        log.info(f"Rainbow Cycle\nwait_ms: {wait_ms}\niterations: {iterations}")
         for j in range(self.MAX_COLOR_VALUE * iterations):
             for i in range(self.strip.numPixels()):
                 self.strip.setPixelColor(

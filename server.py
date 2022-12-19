@@ -16,7 +16,7 @@ log = config.log
 
 # Create server and set allowed domain origins
 sio = socketio.Server(
-    logger=True, async_mode='eventlet', cors_allowed_origins="*"
+    logger=True, async_mode="eventlet", cors_allowed_origins="*"
 )
 app = Flask(__name__)
 cors = CORS(app, origins=config.secrets["CORS_ALLOWED_DOMAINS"])
@@ -26,10 +26,29 @@ app.wsgi_app = socketio.WSGIApp(sio, app.wsgi_app)
 light_loop = LightLoop()
 light_string = LightString()
 
+
+@app.route("/setColorMode/", methods=["POST"])
+def set_color_mode():
+    """sets all pixels on tree to black
+
+    Returns:
+        FlaskResponse: Positive HTTP Response
+    """
+    data = request.json
+    color_mode = data.get("color_mode")
+
+    if not len(color_mode) == 3:
+        return FlaskResponse("Color mode must be 3 chars", status=406)
+
+    light_string.color_mode = color_mode
+    return FlaskResponse("Updated Light mode.", status=202)
+
+
 @sio.event
 def connect(*args):
     """Logs a message on new client connections."""
     log.info("New client connected.")
+
 
 @sio.event
 def set_color(_sid, color: List[int]):
@@ -40,7 +59,7 @@ def set_color(_sid, color: List[int]):
     """
     light_loop.set_static_lights(
         light_string.set_solid, {"color": LedColor.rgb(color)}
-    )    
+    )
 
 
 @app.route("/turnOffLights/", methods=["POST"])
@@ -84,6 +103,7 @@ def set_solid():
 
     light_loop.set_static_lights(light_string.set_solid, {"color": led_color})
     return FlaskResponse(f"Set lights to color {color}", status=202)
+
 
 @app.route("/setCustomPattern/", methods=["POST"])
 def set_custom_pattern():
@@ -133,6 +153,7 @@ def set_pattern():
         f"Set to lighting pattern {request.json['pattern']}", status=200
     )
 
+
 # Simple test endpoint for debugging
 @app.route("/test/", methods=["GET", "POST"])
 def test_turn_yellow():
@@ -140,11 +161,14 @@ def test_turn_yellow():
 
     return FlaskResponse("Test Received!!", status=202)
 
+
 # Simple test endpoint for debugging
 @app.route("/bonjour/", methods=["GET"])
 def bonjour_to_web_server():
-    light_loop.set_static_lights(light_string.random_colors)
-
+    light_loop.set_static_lights(
+        light_string.set_solid_from_rgb_list,
+        {"rgb_list": [[100, 255, 0], [0, 0, 255]]},
+    )
     return FlaskResponse("BONJOUR!", status=202)
 
 
