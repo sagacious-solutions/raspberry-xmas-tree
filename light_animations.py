@@ -1,16 +1,28 @@
 from typing import List, Optional
 import time
 
-from rpi_ws281x import Color, PixelStrip
+from rpi_ws281x import Color, PixelStrip, ws
 from colors import LedColor
 
 from config import log
+
+strip_mode = {
+    "rgb": ws.WS2811_STRIP_GRB,
+    "rbg": ws.WS2811_STRIP_RBG,
+    "grb": ws.WS2811_STRIP_GRB,
+    "gbr": ws.WS2811_STRIP_GBR,
+    "brg": ws.WS2811_STRIP_BRG,
+    "bgr": ws.WS2811_STRIP_BGR,
+}
+
 
 class LightString:
     def __init__(self, led_count: int = 100, color_mode="rgb") -> None:
         # LED strip configuration:
         self.LED_COUNT = led_count  # Number of LED pixels.
         self.color_mode = color_mode
+        self.strip_type = strip_mode.get(color_mode, None)
+
         LED_PIN = 18  # GPIO pin connected to the pixels (must support PWM!).
         LED_FREQ_HZ = 800000  # LED signal frequency in hertz (usually 800khz)
         LED_DMA = 10  # DMA channel to use for generating signal (try 10)
@@ -23,7 +35,6 @@ class LightString:
         self.ONE_SECOND_IN_MILLISECONDS = 1000
         self.MAX_COLOR_VALUE = 256
 
-
         # Create PixelStrip object with appropriate configuration.
         self.strip = PixelStrip(
             self.LED_COUNT,
@@ -33,6 +44,7 @@ class LightString:
             LED_INVERT,
             LED_BRIGHTNESS,
             LED_CHANNEL,
+            self.strip_type,
         )
         self.strip.begin()
 

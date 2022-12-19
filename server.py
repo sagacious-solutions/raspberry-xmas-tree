@@ -8,7 +8,7 @@ import socketio
 
 from colors import LedColor
 from lightloop import LightLoop
-from light_animations import LightString
+from light_animations import LightString, strip_mode
 
 import config
 
@@ -27,21 +27,29 @@ light_loop = LightLoop()
 light_string = LightString()
 
 
-@app.route("/setColorMode/", methods=["POST"])
-def set_color_mode():
+@app.route("/configDevice/", methods=["POST"])
+def config_string():
     """sets all pixels on tree to black
 
     Returns:
         FlaskResponse: Positive HTTP Response
     """
+    global light_string
     data = request.json
-    color_mode = data.get("color_mode")
+    color_mode = data.get("color_mode").lower()
+    led_count = data.get("led_count")
 
-    if not len(color_mode) == 3:
-        return FlaskResponse("Color mode must be 3 chars", status=406)
+    log.info(data)
 
-    light_string.color_mode = color_mode
-    return FlaskResponse("Updated Light mode.", status=202)
+    if color_mode not in strip_mode.keys():
+        return FlaskResponse(f"Data : {color_mode} is not valid", status=406)
+
+    light_string = LightString(led_count=int(led_count), color_mode=color_mode)
+    light_loop.set_static_lights(
+        light_string.set_solid, {"color": LedColor.white}
+    )
+
+    return FlaskResponse("Updated string config", status=202)
 
 
 @sio.event
