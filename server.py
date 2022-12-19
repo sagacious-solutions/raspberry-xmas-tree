@@ -11,6 +11,7 @@ from lightloop import LightLoop
 from light_animations import LightString, strip_mode
 
 import config
+import helpers
 
 log = config.log
 
@@ -22,9 +23,10 @@ app = Flask(__name__)
 cors = CORS(app, origins=config.secrets["CORS_ALLOWED_DOMAINS"])
 app.wsgi_app = socketio.WSGIApp(sio, app.wsgi_app)
 
+device_config = helpers.get_config_from_file()
 
-light_loop = LightLoop()
-light_string = LightString()
+light_string = LightString(**device_config)
+light_loop = LightLoop(light_string)
 
 
 @app.route("/configDevice/", methods=["POST"])
@@ -43,6 +45,10 @@ def config_string():
 
     if color_mode not in strip_mode.keys():
         return FlaskResponse(f"Data : {color_mode} is not valid", status=406)
+
+    helpers.write_config_to_file(
+        {"led_count": int(led_count), "color_mode": color_mode}
+    )
 
     light_string = LightString(led_count=int(led_count), color_mode=color_mode)
     light_loop.set_static_lights(
@@ -181,7 +187,6 @@ def bonjour_to_web_server():
 
 
 if __name__ == "__main__":
-
     # deploy with eventlet
     import eventlet
     import eventlet.wsgi

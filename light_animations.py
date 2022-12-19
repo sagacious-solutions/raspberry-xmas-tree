@@ -19,7 +19,7 @@ strip_mode = {
 class LightString:
     def __init__(self, led_count: int = 100, color_mode="rgb") -> None:
         # LED strip configuration:
-        self.LED_COUNT = led_count  # Number of LED pixels.
+        self.led_count = led_count  # Number of LED pixels.
         self.color_mode = color_mode
         self.strip_type = strip_mode.get(color_mode, None)
 
@@ -37,7 +37,7 @@ class LightString:
 
         # Create PixelStrip object with appropriate configuration.
         self.strip = PixelStrip(
-            self.LED_COUNT,
+            self.led_count,
             LED_PIN,
             LED_FREQ_HZ,
             LED_DMA,
@@ -55,7 +55,7 @@ class LightString:
         Args:
             rgb_list (List[List[int]]): List of list of integers representing RGB Values
         """
-        for pixel_n in range(self.LED_COUNT):
+        for pixel_n in range(self.led_count):
             color = LedColor.rgb(rgb_list[pixel_n % len(rgb_list)])
             self.strip.setPixelColor(pixel_n, color)
 
