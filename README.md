@@ -21,7 +21,7 @@ This is a repository for my Christmas Tree. Utilizing a Raspberry Pi and a ws281
     - You will need to install Node JS prior to pm2
     - You can daemonize it anyway you like, if you don't though the service will be lost on reboot
 3) Set and forget the service
-    - Set the service to run a boot.
+    - Set the service to run at boot.
     - Make sure the service runs as sudo, otherwise it will error out as it won't have hardware level access
 
 ### A note about security
