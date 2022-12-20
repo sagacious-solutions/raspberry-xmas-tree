@@ -2,15 +2,11 @@
 
 from multiprocessing import Process
 from typing import Callable
-
-from light_animations import LightString
 from colors import LedColor
-
-light_string = LightString()
 
 
 class LightLoop:
-    def __init__(self):
+    def __init__(self, light_string):
         self.starting_color = LedColor.brightViolet
         self.process = Process(
             target=light_string.set_solid, args=[self.starting_color]

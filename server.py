@@ -8,28 +8,61 @@ import socketio
 
 from colors import LedColor
 from lightloop import LightLoop
-from light_animations import LightString
+from light_animations import LightString, strip_mode
 
 import config
+import helpers
 
 log = config.log
 
 # Create server and set allowed domain origins
 sio = socketio.Server(
-    logger=True, async_mode='eventlet', cors_allowed_origins="*"
+    logger=True, async_mode="eventlet", cors_allowed_origins="*"
 )
 app = Flask(__name__)
 cors = CORS(app, origins=config.secrets["CORS_ALLOWED_DOMAINS"])
 app.wsgi_app = socketio.WSGIApp(sio, app.wsgi_app)
 
+device_config = helpers.get_config_from_file()
 
-light_loop = LightLoop()
-light_string = LightString()
+light_string = LightString(**device_config)
+light_loop = LightLoop(light_string)
+
+
+@app.route("/configDevice/", methods=["POST"])
+def config_string():
+    """sets all pixels on tree to black
+
+    Returns:
+        FlaskResponse: Positive HTTP Response
+    """
+    global light_string
+    data = request.json
+    color_mode = data.get("color_mode").lower()
+    led_count = data.get("led_count")
+
+    log.info(data)
+
+    if color_mode not in strip_mode.keys():
+        return FlaskResponse(f"Data : {color_mode} is not valid", status=406)
+
+    helpers.write_config_to_file(
+        {"led_count": int(led_count), "color_mode": color_mode}
+    )
+
+    light_string = LightString(led_count=int(led_count), color_mode=color_mode)
+    light_loop.set_static_lights(
+        light_string.set_solid, {"color": LedColor.white}
+    )
+
+    return FlaskResponse("Updated string config", status=202)
+
 
 @sio.event
 def connect(*args):
     """Logs a message on new client connections."""
     log.info("New client connected.")
+
 
 @sio.event
 def set_color(_sid, color: List[int]):
@@ -40,7 +73,7 @@ def set_color(_sid, color: List[int]):
     """
     light_loop.set_static_lights(
         light_string.set_solid, {"color": LedColor.rgb(color)}
-    )    
+    )
 
 
 @app.route("/turnOffLights/", methods=["POST"])
@@ -84,6 +117,7 @@ def set_solid():
 
     light_loop.set_static_lights(light_string.set_solid, {"color": led_color})
     return FlaskResponse(f"Set lights to color {color}", status=202)
+
 
 @app.route("/setCustomPattern/", methods=["POST"])
 def set_custom_pattern():
@@ -133,6 +167,7 @@ def set_pattern():
         f"Set to lighting pattern {request.json['pattern']}", status=200
     )
 
+
 # Simple test endpoint for debugging
 @app.route("/test/", methods=["GET", "POST"])
 def test_turn_yellow():
@@ -141,8 +176,17 @@ def test_turn_yellow():
     return FlaskResponse("Test Received!!", status=202)
 
 
-if __name__ == "__main__":
+# Simple test endpoint for debugging
+@app.route("/bonjour/", methods=["GET"])
+def bonjour_to_web_server():
+    light_loop.set_static_lights(
+        light_string.set_solid_from_rgb_list,
+        {"rgb_list": [[100, 255, 0], [0, 0, 255]]},
+    )
+    return FlaskResponse("BONJOUR!", status=202)
 
+
+if __name__ == "__main__":
     # deploy with eventlet
     import eventlet
     import eventlet.wsgi
