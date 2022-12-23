@@ -7,7 +7,7 @@ from colors import LedColor
 from config import log
 
 strip_mode = {
-    "rgb": ws.WS2811_STRIP_GRB,
+    "rgb": ws.WS2811_STRIP_RGB,
     "rbg": ws.WS2811_STRIP_RBG,
     "grb": ws.WS2811_STRIP_GRB,
     "gbr": ws.WS2811_STRIP_GBR,
