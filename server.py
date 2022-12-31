@@ -191,4 +191,14 @@ if __name__ == "__main__":
     import eventlet
     import eventlet.wsgi
 
-    eventlet.wsgi.server(eventlet.listen(("", 5000)), app)
+    # eventlet.wsgi.server(eventlet.listen(("", 5000)), app)
+
+    eventlet.wsgi.server(
+        eventlet.wrap_ssl(
+            eventlet.listen(("", 5000)),
+            certfile="./credentials/cert.pem",
+            keyfile="./credentials/key.pem",
+            server_side=True,
+        ),
+        app,
+    )
