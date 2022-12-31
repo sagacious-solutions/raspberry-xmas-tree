@@ -1,6 +1,6 @@
-# Python RGB Christmas Tree
+# RGB Everywhere Hardware API
 
-This is a repository for my Christmas Tree. Utilizing a Raspberry Pi and a ws281x RGB Light string, we are able to control my Christmas Tree's RGB lights from a React Touch Screen interface.
+This is a repository for lighting device drivers for RGB Everywhere. It allows a raspberry pi to control a WS281x lighting device. An unlimited number of these can be deployed and controlled via the <a href="https://github.com/sagacious-solutions/rgb-everywhere-web-interface">RGB Everywhere Web Interface</a>
 
 # Tech-Stack
  - Raspberry Pi
