@@ -1,14 +1,15 @@
 from typing import List
-import logging
 
 from flask import Flask, request
 from flask import Response as FlaskResponse
 from flask_cors import CORS
 import socketio
 
+from SpotifyAudioAnalysis import SpotifyAudioAnalysis
 from colors import LedColor
-from lightloop import LightLoop
-from light_animations import LightString, strip_mode
+from LightLoop import LightLoop
+from LightString import LightString, strip_mode
+from DynamicDisplay import DynamicDisplay
 
 import config
 import helpers
@@ -27,6 +28,7 @@ device_config = helpers.get_config_from_file()
 
 light_string = LightString(**device_config)
 light_loop = LightLoop(light_string)
+dynamic_display = DynamicDisplay(light_string=light_string)
 
 
 @app.route("/configDevice/", methods=["POST"])
@@ -37,6 +39,7 @@ def config_string():
         FlaskResponse: Positive HTTP Response
     """
     global light_string
+    global dynamic_display
     data = request.json
     color_mode = data.get("color_mode").lower()
     led_count = data.get("led_count")
@@ -51,6 +54,8 @@ def config_string():
     )
 
     light_string = LightString(led_count=int(led_count), color_mode=color_mode)
+    dynamic_display = DynamicDisplay(light_string=light_string)
+
     light_loop.set_static_lights(
         light_string.set_solid, {"color": LedColor.white}
     )
@@ -71,6 +76,7 @@ def set_color(_sid, color: List[int]):
     Args:
         color (List[int]): Color to set tree
     """
+    dynamic_display.terminate_all_running_process()
     light_loop.set_static_lights(
         light_string.set_solid, {"color": LedColor.rgb(color)}
     )
@@ -83,6 +89,7 @@ def turn_off_lights():
     Returns:
         FlaskResponse: Positive HTTP Response
     """
+    dynamic_display.terminate_all_running_process()
     light_loop.set_static_lights(
         light_string.set_solid, {"color": LedColor.black}
     )
@@ -114,7 +121,7 @@ def set_solid():
         return FlaskResponse(
             f"No valid preset color found for {color}", status=401
         )
-
+    dynamic_display.terminate_all_running_process()
     light_loop.set_static_lights(light_string.set_solid, {"color": led_color})
     return FlaskResponse(f"Set lights to color {color}", status=202)
 
@@ -129,6 +136,7 @@ def set_custom_pattern():
     data = request.json
     pattern = data.get("pattern")
     log.info(pattern)
+    dynamic_display.terminate_all_running_process()
     light_loop.set_static_lights(
         light_string.set_solid_from_rgb_list, {"rgb_list": pattern}
     )
@@ -144,6 +152,7 @@ def set_rgb_color():
             f"Improper data sent. Must be a 3 index list. {color}", status=401
         )
 
+    dynamic_display.terminate_all_running_process()
     light_loop.set_static_lights(
         light_string.set_solid, {"color": LedColor.rgb(color)}
     )
@@ -158,6 +167,7 @@ def set_pattern():
     if not pattern or pattern not in pattern_fn_map.keys():
         return FlaskResponse("Missing or Invalid Pattern", status=404)
 
+    dynamic_display.terminate_all_running_process()
     pattern_fn = pattern_fn_map.get(pattern)
     light_loop.set_looping_pattern(
         pattern_fn.get("fn"),
@@ -171,9 +181,28 @@ def set_pattern():
 # Simple test endpoint for debugging
 @app.route("/test/", methods=["GET", "POST"])
 def test_turn_yellow():
+    dynamic_display.terminate_all_running_process()
     light_loop.set_static_lights(light_string.random_colors)
 
     return FlaskResponse("Test Received!!", status=202)
+
+# Starts lighting device running with dual beat spotify visualization
+@app.route("/spotifyVisualizeDualBeat/", methods=["POST"])
+def spotify_visualize_dual_beat():
+    data = request.json
+    track_progress = data.get("track_progress")
+    track_data = data.get("track_data")
+    lag_time_ms = data.get("lag_time_ms")
+
+    audio_analysis = SpotifyAudioAnalysis(
+        track_progress=track_progress, lag_time_ms=lag_time_ms, **track_data
+    )
+
+    light_loop.terminate_running_process()
+    dynamic_display.reinitialize()
+    dynamic_display.dual_beats(audio_analysis)
+
+    return FlaskResponse("Setting visualizer to dual beat", status=202)
 
 
 # Simple test endpoint for debugging
