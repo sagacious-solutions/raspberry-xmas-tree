@@ -11,6 +11,7 @@ from typing import Callable, List
 import time
 import copy
 from rpi_ws281x import Color
+from config import log
 
 from SpotifyAudioAnalysis import SpotifyAudioAnalysis
 from colors import LedColor
@@ -23,13 +24,18 @@ class DynamicDisplay:
         self.group_threads = {}
         self.light_refresh_loop = None
         self.pixel_array = Array("l", light_string.led_count)
-        self.__start_refresh_thread()
 
-    def clean_up(self):
+    def reinitialize(self):
+        self.terminate_all_running_process()
+        self.__start_refresh_thread()
+        log.info("All threads stopped and display thread restarted.")
+
+    def terminate_all_running_process(self):
         """End all processes associated with the class. Meant to be run in the finally
         block anytime the class is instantiated.
         """
-        self.light_refresh_loop.terminate()
+        if self.light_refresh_loop:
+            self.light_refresh_loop.terminate()
 
         # Terminate all open animation threads
         for key in self.group_threads.keys():
@@ -89,12 +95,13 @@ class DynamicDisplay:
         color_change_on: str = "bar",
     ):
         last_active = {}
+        rgb_black = [0, 0, 0]
 
         while (
             audio_analysis.get_track_progress_seconds()
             < audio_analysis.track_duration * 1000
         ):
-            now_active = audio_analysis.active_thingies()
+            now_active = audio_analysis.get_active_binary_search()
 
             if now_active.get(color_change_on) and (
                 not last_active.get(color_change_on)
@@ -108,17 +115,28 @@ class DynamicDisplay:
                     ]
                 )
 
-            if now_active.get("beat") and (
-                not last_active.get("beat") == now_active.get("beat")
+            active_beat = now_active.get("beat")
+            if (
+                not active_beat
+                or active_beat["confidence"]
+                < audio_analysis.beat_confidence_average
             ):
-                if (
-                    now_active.get("beat")
-                    and now_active.get("beat")["index"] % nth_beat == 0
-                ):
-                    print(f"run_group_on_beat - {group_name} - ran")
-                    self.update_group(group_name, color)
+                time.sleep(0.001)
 
-            last_active = copy.deepcopy(now_active)
+            if active_beat and (not last_active.get("beat") == active_beat):
+                if active_beat["index"] % nth_beat == 0:
+                    self.update_group(group_name, color)
+                    start_color_list = LedColor.get_rgb_value(color)
+                    for i in range(100):
+                        time.sleep(
+                            ((active_beat["duration"] / 100) * nth_beat) * 0.9
+                        )
+                        mid_color = LedColor.interpolate_rgb(
+                            start_color_list, rgb_black, i / 100
+                        )
+                        self.update_group(group_name, Color(*mid_color))
+
+            last_active = now_active
 
     def dual_beats(self, audio_analysis: SpotifyAudioAnalysis):
         self.groups = {}
@@ -151,79 +169,13 @@ class DynamicDisplay:
             "args": [audio_analysis, "every_2nd_beat", 2],
             "kwargs": {
                 "colors": [
-                    Color(
-                        0,
-                        255,
-                        0,
-                    ),
-                    Color(
-                        0,
-                        0,
-                        255,
-                    ),
+                    LedColor.green,
+                    LedColor.autumnOrange,
+                    LedColor.brightViolet,
+                    LedColor.fallYellow,
                 ]
             },
         }
 
         self.__start_thread_for_group("all_beat", **all_beat)
         self.__start_thread_for_group("every_2nd_beat", **every_2nd_beat)
-
-        # def all_beat():
-        #     last_active = {}
-
-        #     while (
-        #         audio_analysis.get_track_progress_seconds()
-        #         < audio_analysis.track_duration * 1000
-        #     ):
-        #         now_active = audio_analysis.active_thingies()
-
-        #         if now_active.get("bar") and (
-        #             not last_active.get("bar") == now_active.get("bar")
-        #         ):
-        #             color = LedColor.get_random()
-
-        #         if now_active.get("beat") and (
-        #             not last_active.get("beat") == now_active.get("beat")
-        #         ):
-        #             print("All beat run")
-        #             self.update_group("all_beat", color)
-        #             # self.set_solid(color)
-        #             # self.transition_colors(
-        #             #     color,
-        #             #     Color(0, 0, 0),
-        #             #     int(now_active.get("beat")["duration"] * 100),
-        #             # )
-
-        #         last_active = copy.deepcopy(now_active)
-
-        # def every_2nd_beat():
-        #     last_active = {}
-
-        #     while (
-        #         audio_analysis.get_track_progress_seconds()
-        #         < audio_analysis.track_duration * 1000
-        #     ):
-        #         now_active = audio_analysis.active_thingies()
-
-        #         if now_active.get("bar") and (
-        #             not last_active.get("bar") == now_active.get("bar")
-        #         ):
-        #             color = LedColor.get_random()
-
-        #         if now_active.get("beat") and (
-        #             not last_active.get("beat") == now_active.get("beat")
-        #         ):
-        #             print("every_2nd_beat ran")
-        #             if (
-        #                 now_active.get("beat")
-        #                 and now_active.get("beat")["index"] % 2 == 0
-        #             ):
-        #                 self.update_group("every_2nd_beat", color)
-        #             # self.set_solid(color)
-        #             # self.transition_colors(
-        #             #     color,
-        #             #     Color(0, 0, 0),
-        #             #     int(now_active.get("beat")["duration"] * 100),
-        #             # )
-
-        #         last_active = copy.deepcopy(now_active)

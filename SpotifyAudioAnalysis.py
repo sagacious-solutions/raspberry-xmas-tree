@@ -26,6 +26,14 @@ class SpotifyAudioAnalysis:
         self.track_duration = track["duration"]
         self.track_progress_ms = track_progress + lag_time_ms
         self.created_time = time.time()
+        self.beat_confidence_average = self.__get_average_beat_confidence()
+
+    def __get_average_beat_confidence(self):
+        beat_confidence = []
+        for beat in self.beats:
+            beat_confidence.append(beat["confidence"])
+
+        return sum(beat_confidence) / len(self.beats)
 
     def get_track_progress_seconds(self) -> float:
         """Gets the current track progress in seconds
