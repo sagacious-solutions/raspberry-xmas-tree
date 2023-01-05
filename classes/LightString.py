@@ -1,9 +1,8 @@
 from typing import List, Optional
 import time
-import copy
 
 from rpi_ws281x import Color, PixelStrip, ws
-from colors import LedColor
+from classes.LedColor import LedColor
 
 from config import log
 
@@ -48,33 +47,6 @@ class LightString:
             self.strip_type,
         )
         self.strip.begin()
-
-    def visualize_spotify(self, audio_analysis):
-        last_active = {}
-        color = LedColor.get_random()
-
-        while (
-            audio_analysis.get_track_progress_seconds()
-            < audio_analysis.track_duration * 1000
-        ):
-            now_active = audio_analysis.active_thingies()
-
-            if now_active.get("bar") and (
-                not last_active.get("bar") == now_active.get("bar")
-            ):
-                color = LedColor.get_random()
-
-            if now_active.get("beat") and (
-                not last_active.get("beat") == now_active.get("beat")
-            ):
-                self.set_solid(color)
-                self.transition_colors(
-                    color,
-                    Color(0, 0, 0),
-                    int(now_active.get("beat")["duration"] * 100),
-                )
-
-            last_active = copy.deepcopy(now_active)
 
     def set_solid_from_rgb_list(self, rgb_list: List[List[int]]):
         """Takes a list of RGB Values and repeats the list of values over the string of
