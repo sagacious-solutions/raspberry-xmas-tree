@@ -9,9 +9,6 @@ from rpi_ws281x import Color
 
 
 class LedColor:
-    # All colors provided in GRB format instead of RGB
-
-    black = Color(0, 0, 0)
     white = Color(255, 255, 255)
     warmWhite = Color(180, 45, 10)
     autumnOrange = Color(180, 35, 0)
@@ -40,3 +37,14 @@ class LedColor:
         index = round(random.random() * len(colors)) - 1
 
         return colors[index]
+
+    def interpolate_rgb(c1, c2, amount):
+        dif_r = c2[0] - c1[0]
+        dif_g = c2[1] - c1[1]
+        dif_b = c2[2] - c1[2]
+
+        new_r = c1[0] + round(dif_r * amount)
+        new_g = c1[1] + round(dif_g * amount)
+        new_b = c1[2] + round(dif_b * amount)
+
+        return [new_r, new_g, new_b]
