@@ -186,6 +186,7 @@ def test_turn_yellow():
 
     return FlaskResponse("Test Received!!", status=202)
 
+
 # Starts lighting device running with dual beat spotify visualization
 @app.route("/spotifyVisualizeDualBeat/", methods=["POST"])
 def spotify_visualize_dual_beat():
@@ -219,8 +220,6 @@ if __name__ == "__main__":
     # deploy with eventlet
     import eventlet
     import eventlet.wsgi
-
-    # eventlet.wsgi.server(eventlet.listen(("", 5000)), app)
 
     eventlet.wsgi.server(
         eventlet.wrap_ssl(
