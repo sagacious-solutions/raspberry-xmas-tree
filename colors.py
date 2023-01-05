@@ -9,6 +9,7 @@ from rpi_ws281x import Color
 
 
 class LedColor:
+    black = Color(0, 0, 0)
     white = Color(255, 255, 255)
     warmWhite = Color(180, 45, 10)
     autumnOrange = Color(180, 35, 0)
@@ -28,10 +29,15 @@ class LedColor:
     def rgb(rgb: List[int]):
         return Color(rgb[0], rgb[1], rgb[2])
 
-    def get_random():
+    def get_random() -> Color:
+        """Chooses one of the above colors at random
+
+        Returns:
+            Color: A random color
+        """
         colors = [
             value
-            for key, value in LedColor.__dict__.items()
+            for _, value in LedColor.__dict__.items()
             if type(value) == int
         ]
         index = round(random.random() * len(colors)) - 1
@@ -61,3 +67,19 @@ class LedColor:
         new_b = c1[2] + round(dif_b * amount)
 
         return [new_r, new_g, new_b]
+
+    def get_rgb_value(color_int: Color) -> List[int]:
+        """The colors are held as integer values. This gets takes a Color and converts
+            it into a list of 3 integers representing RGB in the range 0-255
+
+        Args:
+            color_int (Color): Color to get the integer list for.
+
+        Returns:
+            List[int]: 3 Integer values in a list from 0-255 for RGB
+        """
+        r = color_int >> 16 & 0xFF
+        g = color_int >> 8 & 0xFF
+        b = color_int & 0xFF
+
+        return [r, g, b]
