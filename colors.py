@@ -38,7 +38,20 @@ class LedColor:
 
         return colors[index]
 
-    def interpolate_rgb(c1, c2, amount):
+    def interpolate_rgb(
+        c1: List[int], c2: List[int], amount: float
+    ) -> List[int]:
+        """Given 2 colors and a value between 0-1, it will give you back a color thats
+            between the 2 values by that percentage of 1
+
+        Args:
+            c1 (List[int]): Color transitioning from
+            c2 (List[int]): Color transitioning to
+            amount (float): What percentage of change between the two
+
+        Returns:
+            List[int]: New interpolated color
+        """
         dif_r = c2[0] - c1[0]
         dif_g = c2[1] - c1[1]
         dif_b = c2[2] - c1[2]
