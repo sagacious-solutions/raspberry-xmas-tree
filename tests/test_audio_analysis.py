@@ -3,7 +3,7 @@ import pytest
 from pathlib import Path
 import time
 
-from SpotifyAudioAnalysis import SpotifyAudioAnalysis
+from classes.SpotifyAudioAnalysis import SpotifyAudioAnalysis
 
 
 track_data_files = [

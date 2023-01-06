@@ -1,8 +1,5 @@
 import time
 from typing import Dict
-from config import log
-
-ONE_SECOND_MILLISECONDS = 1000
 
 
 class SpotifyAudioAnalysis:

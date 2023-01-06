@@ -1,5 +1,4 @@
-import pytest
-from colors import LedColor
+from classes.LedColor import LedColor
 
 
 def test_interpolate_rgb_val_1_0():

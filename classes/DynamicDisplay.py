@@ -9,12 +9,11 @@ It runs the light_string in a second thread constantly refreshing it based on wh
 from multiprocessing import Process, Array
 from typing import Callable, List
 import time
-import copy
 from rpi_ws281x import Color
 from config import log
 
-from SpotifyAudioAnalysis import SpotifyAudioAnalysis
-from colors import LedColor
+from classes.SpotifyAudioAnalysis import SpotifyAudioAnalysis
+from classes.LedColor import LedColor
 
 
 class DynamicDisplay:

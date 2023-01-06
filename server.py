@@ -5,11 +5,11 @@ from flask import Response as FlaskResponse
 from flask_cors import CORS
 import socketio
 
-from SpotifyAudioAnalysis import SpotifyAudioAnalysis
-from colors import LedColor
-from LightLoop import LightLoop
-from LightString import LightString, strip_mode
-from DynamicDisplay import DynamicDisplay
+from classes.SpotifyAudioAnalysis import SpotifyAudioAnalysis
+from classes.LedColor import LedColor
+from classes.LightLoop import LightLoop
+from classes.LightString import LightString, strip_mode
+from classes.DynamicDisplay import DynamicDisplay
 
 import config
 import helpers

@@ -2,7 +2,7 @@
 
 from multiprocessing import Process
 from typing import Callable
-from colors import LedColor
+from classes.LedColor import LedColor
 
 
 class LightLoop:
