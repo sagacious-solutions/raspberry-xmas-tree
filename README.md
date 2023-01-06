@@ -9,6 +9,11 @@ This is a repository for lighting device drivers for RGB Everywhere. It allows a
 - Control devices in real time and wow your pets with an ever changing rainbow
 - Dance party mode will visualize your spotify tracks into a mesmerizing dance of colors
 
+# Demo of Visualizer
+[<img src="https://i.ytimg.com/vi/9jklt9LoFyM/maxresdefault.jpg" width="50%">](https://www.youtube.com/shorts/9jklt9LoFyM "Click for Spotify Visualizer Demo")
+
+Don't be surprised if the whole neighbourhood shows up for the party!
+
 # Tech-Stack
 
 - Raspberry Pi zero 2 W
