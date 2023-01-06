@@ -2,7 +2,7 @@ from typing import List, Optional
 import time
 
 from rpi_ws281x import Color, PixelStrip, ws
-from colors import LedColor
+from classes.LedColor import LedColor
 
 from config import log
 
