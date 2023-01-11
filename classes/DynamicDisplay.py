@@ -136,7 +136,7 @@ class DynamicDisplay:
             if (
                 not active_beat
                 or active_beat["confidence"]
-                < audio_analysis.beat_confidence_average * 0.5
+                < audio_analysis.confidence_average["beats"] * 0.5
             ):
                 time.sleep(0.01)
                 continue
@@ -156,6 +156,67 @@ class DynamicDisplay:
 
             last_active = now_active
 
+    def run_group_on_item(
+        self,
+        audio_analysis,
+        group_name: str,
+        nth_item: int,
+        item: "beats",
+        colors: List[Color] = None,
+        color_change_on: str = "bars",
+    ):
+        last_active = {}
+        rgb_black = [0, 0, 0]
+        color = LedColor.black
+
+        while (
+            audio_analysis.get_track_progress_seconds()
+            < audio_analysis.track_duration * 1000
+        ):
+            now_active = audio_analysis.get_active_binary_search()
+
+            if not now_active:
+                self.__terminate_string_refresh_loop()
+                self.light_string.set_solid(LedColor.black)
+                return
+
+            if now_active.get(color_change_on) and (
+                not last_active.get(color_change_on)
+                == now_active.get(color_change_on)
+            ):
+                color = (
+                    LedColor.get_random()
+                    if not colors
+                    else colors[
+                        now_active.get(color_change_on)["index"] % len(colors)
+                    ]
+                )
+
+            active_item = now_active.get(item)
+
+            if (
+                not active_item
+                or active_item["confidence"]
+                < audio_analysis.confidence_average[item] * 0.5
+            ):
+                time.sleep(0.01)
+                continue
+
+            if active_item and (not last_active.get(item) == active_item):
+                if active_item["index"] % nth_item == 0:
+                    self.update_group(group_name, color)
+                    start_color_list = LedColor.get_rgb_value(color)
+                    for i in range(100):
+                        time.sleep(
+                            ((active_item["duration"] / 100) * nth_item) * 0.5
+                        )
+                        mid_color = LedColor.interpolate_rgb(
+                            start_color_list, rgb_black, i / 100
+                        )
+                        self.update_group(group_name, Color(*mid_color))
+
+            last_active = now_active
+
     def dual_beats(self, audio_analysis: SpotifyAudioAnalysis):
         self.groups = {}
 
@@ -167,10 +228,11 @@ class DynamicDisplay:
         )
 
         all_beat = {
-            "target": self.run_group_on_beat,
+            "target": self.run_group_on_item,
             "args": [audio_analysis, "all_beat", 1],
             "kwargs": {
-                "color_change_on": "beat",
+                "color_change_on": "beats",
+                "item": "beats",
                 "colors": [
                     Color(
                         255,
@@ -186,15 +248,16 @@ class DynamicDisplay:
             },
         }
         every_2nd_beat = {
-            "target": self.run_group_on_beat,
+            "target": self.run_group_on_item,
             "args": [audio_analysis, "every_2nd_beat", 2],
             "kwargs": {
+                "item": "beats",
                 "colors": [
                     LedColor.green,
                     LedColor.autumnOrange,
                     LedColor.brightViolet,
                     LedColor.fallYellow,
-                ]
+                ],
             },
         }
 
