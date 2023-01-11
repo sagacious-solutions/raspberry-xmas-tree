@@ -1,4 +1,5 @@
 from typing import List
+import time
 
 from flask import Flask, request
 from flask import Response as FlaskResponse
@@ -196,7 +197,9 @@ def spotify_visualize_dual_beat():
     lag_time_ms = data.get("lag_time_ms")
 
     audio_analysis = SpotifyAudioAnalysis(
-        track_progress=track_progress, lag_time_ms=lag_time_ms, **track_data
+        track_progress=track_progress,
+        lag_time_ms=lag_time_ms,
+        **track_data,
     )
 
     light_loop.terminate_running_process()
