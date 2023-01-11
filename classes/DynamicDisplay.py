@@ -26,15 +26,26 @@ class DynamicDisplay:
 
     def reinitialize(self):
         self.terminate_all_running_process()
+        self.pixel_array = None
+        self.pixel_array = Array("l", self.light_string.led_count)
         self.__start_refresh_thread()
-        log.info("All threads stopped and display thread restarted.")
+        log.info(
+            "All threads stopped, pixel_array reinitialized and display thread"
+            " restarted."
+        )
+
+    def __terminate_string_refresh_loop(self):
+        if self.light_refresh_loop:
+            self.light_refresh_loop.terminate()
 
     def terminate_all_running_process(self):
         """End all processes associated with the class. Meant to be run in the finally
         block anytime the class is instantiated.
         """
-        if self.light_refresh_loop:
-            self.light_refresh_loop.terminate()
+        if not self.light_refresh_loop:
+            return
+
+        self.light_refresh_loop.terminate()
 
         # Terminate all open animation threads
         for key in self.group_threads.keys():
@@ -61,6 +72,7 @@ class DynamicDisplay:
         args: list = [],
         kwargs: dict = {},
     ):
+        log.info(f"Starting thread for group {group_name}")
         self.group_threads[group_name] = Process(
             target=target, args=args, kwargs=kwargs
         )
@@ -95,12 +107,18 @@ class DynamicDisplay:
     ):
         last_active = {}
         rgb_black = [0, 0, 0]
+        color = LedColor.black
 
         while (
             audio_analysis.get_track_progress_seconds()
             < audio_analysis.track_duration * 1000
         ):
             now_active = audio_analysis.get_active_binary_search()
+
+            if not now_active:
+                self.__terminate_string_refresh_loop()
+                self.light_string.set_solid(LedColor.black)
+                return
 
             if now_active.get(color_change_on) and (
                 not last_active.get(color_change_on)
@@ -118,9 +136,10 @@ class DynamicDisplay:
             if (
                 not active_beat
                 or active_beat["confidence"]
-                < audio_analysis.beat_confidence_average
+                < audio_analysis.beat_confidence_average * 0.5
             ):
-                time.sleep(0.001)
+                time.sleep(0.01)
+                continue
 
             if active_beat and (not last_active.get("beat") == active_beat):
                 if active_beat["index"] % nth_beat == 0:
@@ -128,7 +147,7 @@ class DynamicDisplay:
                     start_color_list = LedColor.get_rgb_value(color)
                     for i in range(100):
                         time.sleep(
-                            ((active_beat["duration"] / 100) * nth_beat) * 0.9
+                            ((active_beat["duration"] / 100) * nth_beat) * 0.5
                         )
                         mid_color = LedColor.interpolate_rgb(
                             start_color_list, rgb_black, i / 100
@@ -139,6 +158,9 @@ class DynamicDisplay:
 
     def dual_beats(self, audio_analysis: SpotifyAudioAnalysis):
         self.groups = {}
+
+        log.info("Starting dual beats.")
+
         self.create_group_of_every_nth(n=2, offset=0, group_name="all_beat")
         self.create_group_of_every_nth(
             n=2, offset=1, group_name="every_2nd_beat"

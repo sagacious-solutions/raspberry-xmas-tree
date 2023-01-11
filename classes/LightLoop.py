@@ -1,5 +1,5 @@
 """This module handles the lighting loop thread. """
-
+import time
 from multiprocessing import Process
 from typing import Callable
 from classes.LedColor import LedColor
@@ -46,3 +46,5 @@ class LightLoop:
         """Terminates anything currently running so other lighting processes can be run"""
         if self.process:
             self.process.terminate()
+            # A pause is needed otherwise the next process won't start correctly
+            time.sleep(0.5)

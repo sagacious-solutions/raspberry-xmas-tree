@@ -103,6 +103,9 @@ class SpotifyAudioAnalysis:
             else progress_seconds
         )
 
+        if track_time_seconds > self.track_duration:
+            return None
+
         active = {
             "bar": self._binary_search_active(self.bars, track_time_seconds),
             "beat": self._binary_search_active(self.beats, track_time_seconds),
