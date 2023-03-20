@@ -209,6 +209,27 @@ def spotify_visualize_dual_beat():
     return FlaskResponse("Setting visualizer to dual beat", status=202)
 
 
+# Starts lighting device running with dual beat spotify visualization
+@app.route("/spotifyVisualizeDualBeatWithTatums/", methods=["POST"])
+def spotify_visualize_dual_beat_with_tatums():
+    data = request.json
+    track_progress = data.get("track_progress")
+    track_data = data.get("track_data")
+    lag_time_ms = data.get("lag_time_ms")
+
+    audio_analysis = SpotifyAudioAnalysis(
+        track_progress=track_progress,
+        lag_time_ms=lag_time_ms,
+        **track_data,
+    )
+
+    light_loop.terminate_running_process()
+    dynamic_display.reinitialize()
+    dynamic_display.dual_beats_with_tatums(audio_analysis)
+
+    return FlaskResponse("Setting visualizer to dual beat", status=202)
+
+
 # Simple test endpoint for debugging
 @app.route("/bonjour/", methods=["GET"])
 def bonjour_to_web_server():
