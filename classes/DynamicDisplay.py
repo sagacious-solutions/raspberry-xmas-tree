@@ -97,65 +97,6 @@ class DynamicDisplay:
 
         self.groups[group_name] = group_pixels
 
-    def run_group_on_beat(
-        self,
-        audio_analysis,
-        group_name: str,
-        nth_beat: int,
-        colors: List[Color] = None,
-        color_change_on: str = "bar",
-    ):
-        last_active = {}
-        rgb_black = [0, 0, 0]
-        color = LedColor.black
-
-        while (
-            audio_analysis.get_track_progress_seconds()
-            < audio_analysis.track_duration * 1000
-        ):
-            now_active = audio_analysis.get_active_binary_search()
-
-            if not now_active:
-                self.__terminate_string_refresh_loop()
-                self.light_string.set_solid(LedColor.black)
-                return
-
-            if now_active.get(color_change_on) and (
-                not last_active.get(color_change_on)
-                == now_active.get(color_change_on)
-            ):
-                color = (
-                    LedColor.get_random()
-                    if not colors
-                    else colors[
-                        now_active.get(color_change_on)["index"] % len(colors)
-                    ]
-                )
-
-            active_beat = now_active.get("beat")
-            if (
-                not active_beat
-                or active_beat["confidence"]
-                < audio_analysis.confidence_average["beats"] * 0.5
-            ):
-                time.sleep(0.01)
-                continue
-
-            if active_beat and (not last_active.get("beat") == active_beat):
-                if active_beat["index"] % nth_beat == 0:
-                    self.update_group(group_name, color)
-                    start_color_list = LedColor.get_rgb_value(color)
-                    for i in range(100):
-                        time.sleep(
-                            ((active_beat["duration"] / 100) * nth_beat) * 0.5
-                        )
-                        mid_color = LedColor.interpolate_rgb(
-                            start_color_list, rgb_black, i / 100
-                        )
-                        self.update_group(group_name, Color(*mid_color))
-
-            last_active = now_active
-
     def run_group_on_item(
         self,
         audio_analysis,
@@ -263,3 +204,66 @@ class DynamicDisplay:
 
         self.__start_thread_for_group("all_beat", **all_beat)
         self.__start_thread_for_group("every_2nd_beat", **every_2nd_beat)
+
+    def dual_beats_with_tatums(self, audio_analysis: SpotifyAudioAnalysis):
+        self.groups = {}
+
+        log.info("Starting dual beats.")
+
+        self.create_group_of_every_nth(n=3, offset=0, group_name="all_beat")
+        self.create_group_of_every_nth(
+            n=3, offset=1, group_name="every_2nd_beat"
+        )
+        self.create_group_of_every_nth(n=3, offset=2, group_name="tatum")
+
+        # Run on every beat
+        all_beat = {
+            "target": self.run_group_on_item,
+            "args": [audio_analysis, "all_beat", 1],
+            "kwargs": {
+                "color_change_on": "beats",
+                "item": "beats",
+                "colors": [
+                    Color(
+                        255,
+                        0,
+                        0,
+                    ),
+                    Color(
+                        255,
+                        255,
+                        255,
+                    ),
+                ],
+            },
+        }
+        # Run on every second beat
+        every_2nd_beat = {
+            "target": self.run_group_on_item,
+            "args": [audio_analysis, "every_2nd_beat", 2],
+            "kwargs": {
+                "item": "beats",
+                "colors": [
+                    LedColor.green,
+                    LedColor.autumnOrange,
+                    LedColor.brightViolet,
+                    LedColor.fallYellow,
+                ],
+            },
+        }
+
+        # Run on every Tatum
+        tatum = {
+            "target": self.run_group_on_item,
+            "args": [audio_analysis, "tatum", 1],
+            "kwargs": {
+                "item": "tatums",
+                "colors": [
+                    LedColor.brightViolet,
+                ],
+            },
+        }
+
+        self.__start_thread_for_group("all_beat", **all_beat)
+        self.__start_thread_for_group("every_2nd_beat", **every_2nd_beat)
+        self.__start_thread_for_group("tatum", **tatum)
