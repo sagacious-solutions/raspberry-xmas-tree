@@ -23,14 +23,17 @@ class SpotifyAudioAnalysis:
         self.track_duration = track["duration"]
         self.track_progress_ms = track_progress + lag_time_ms
         self.created_time = time.time()
-        self.beat_confidence_average = self.__get_average_beat_confidence()
+        self.confidence_average = {
+            "beats": self.__get_average_item_confidence("beats"),
+            "tatums": self.__get_average_item_confidence("tatums"),
+        }
 
-    def __get_average_beat_confidence(self):
-        beat_confidence = []
-        for beat in self.beats:
-            beat_confidence.append(beat["confidence"])
+    def __get_average_item_confidence(self, item_name):
+        confidence = []
+        for item in self.__dict__[item_name]:
+            confidence.append(item["confidence"])
 
-        return sum(beat_confidence) / len(self.beats)
+        return sum(confidence) / len(self.__dict__[item_name])
 
     def get_track_progress_seconds(self) -> float:
         """Gets the current track progress in seconds
@@ -61,16 +64,21 @@ class SpotifyAudioAnalysis:
             else progress_seconds
         )
 
+        if track_time_seconds > self.track_duration:
+            return None
+
         active = {
-            "bar": self.__linear_search_active(self.bars, track_time_seconds),
-            "beat": self.__linear_search_active(self.beats, track_time_seconds),
-            "section": self.__linear_search_active(
+            "bars": self.__linear_search_active(self.bars, track_time_seconds),
+            "beats": self.__linear_search_active(
+                self.beats, track_time_seconds
+            ),
+            "sections": self.__linear_search_active(
                 self.sections, track_time_seconds
             ),
-            "segment": self.__linear_search_active(
+            "segments": self.__linear_search_active(
                 self.segments, track_time_seconds
             ),
-            "tatum": self.__linear_search_active(
+            "tatums": self.__linear_search_active(
                 self.tatums, track_time_seconds
             ),
         }
@@ -107,15 +115,15 @@ class SpotifyAudioAnalysis:
             return None
 
         active = {
-            "bar": self._binary_search_active(self.bars, track_time_seconds),
-            "beat": self._binary_search_active(self.beats, track_time_seconds),
-            "section": self._binary_search_active(
+            "bars": self._binary_search_active(self.bars, track_time_seconds),
+            "beats": self._binary_search_active(self.beats, track_time_seconds),
+            "sections": self._binary_search_active(
                 self.sections, track_time_seconds
             ),
-            "segment": self._binary_search_active(
+            "segments": self._binary_search_active(
                 self.segments, track_time_seconds
             ),
-            "tatum": self._binary_search_active(
+            "tatums": self._binary_search_active(
                 self.tatums, track_time_seconds
             ),
         }
