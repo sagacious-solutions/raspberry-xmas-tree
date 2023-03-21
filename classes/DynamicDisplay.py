@@ -99,13 +99,25 @@ class DynamicDisplay:
 
     def run_group_on_item(
         self,
-        audio_analysis,
+        audio_analysis: SpotifyAudioAnalysis,
         group_name: str,
         nth_item: int,
-        item: "beats",
+        item: str = "beats",
         colors: List[Color] = None,
         color_change_on: str = "bars",
     ):
+        """Sets up a lighting pattern using item for the key grabbed in Audio Analysis
+
+        Args:
+            audio_analysis (SpotifyAudioAnalysis) : Audio analysis controller
+            group_name (str): Key in groups dict to get pixel numbers from
+            nth_item (int): Activate pixel on every nTh item
+            item (str): Which specific key in the audio analysis to use
+            colors (List[Color]): Colors to use for lighting pattern. Uses a random
+                color if no list is provided
+            color_change_on (str): Key to watch for from Audio Analysis to make color
+                changes on
+        """
         last_active = {}
         rgb_black = [0, 0, 0]
         color = LedColor.black

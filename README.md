@@ -3,13 +3,16 @@
 This is a repository for lighting device drivers for RGB Everywhere. It allows a raspberry pi to control a WS281x lighting device. An unlimited number of these can be deployed and controlled via the <a href="https://github.com/sagacious-solutions/rgb-everywhere-web-interface">RGB Everywhere Web Interface</a>
 
 # Features
-- Advanced and visually stunning animations 
+
+- Continuous Integration via GitHub actions to ensure best possible quality code
+- Advanced and visually stunning animations
 - Set any device to any color you like
 - Save and easily display favorite patterns through the web interface
 - Control devices in real time and wow your pets with an ever changing rainbow
 - Dance party mode will visualize your spotify tracks into a mesmerizing dance of colors
 
 # Demo of Visualizer
+
 [<img src="https://i.ytimg.com/vi/9jklt9LoFyM/maxresdefault.jpg" width="50%">](https://www.youtube.com/shorts/9jklt9LoFyM "Click for Spotify Visualizer Demo")
 
 Don't be surprised if the whole neighbourhood shows up for the party!
@@ -17,6 +20,7 @@ Don't be surprised if the whole neighbourhood shows up for the party!
 # Tech-Stack
 
 - Raspberry Pi zero 2 W
+- GitHub Actions for Continuous Integration Pipeline
 - Debian Linux
 - Python
 - Flask
