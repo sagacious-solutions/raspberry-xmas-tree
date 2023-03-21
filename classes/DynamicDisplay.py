@@ -102,7 +102,7 @@ class DynamicDisplay:
         audio_analysis,
         group_name: str,
         nth_item: int,
-        item: "beats",
+        item: str = "beats",
         colors: List[Color] = None,
         color_change_on: str = "bars",
     ):
