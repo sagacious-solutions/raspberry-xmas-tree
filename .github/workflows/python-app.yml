@@ -38,4 +38,4 @@ jobs:
           python -m coverage run --source=./ -m pytest -rsx tests/
       - name: Coveralls Python
           uses: AndreMiras/coveralls-python-action@v20201129
-            github-token: ${{ COVERALLS_REPO_TOKEN }}
+            github-token: ${{ vars.COVERALLS_REPO_TOKEN }}
