@@ -37,5 +37,20 @@ jobs:
         run: |
           python -m coverage run --source=./ -m pytest -rsx tests/
       - name: Coveralls Python
-          uses: AndreMiras/coveralls-python-action@v20201129
-            github-token: ${{ vars.COVERALLS_REPO_TOKEN }}
+        run: |
+          python -m coveralls --service=github
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          COVERALLS_PARALLEL: true
+  coveralls:
+    name: Indicate completion to coveralls.io
+    needs: test
+    runs-on: ubuntu-latest
+    container: python:3-slim
+    steps:
+      - name: Finished
+        run: |
+          pip3 install --upgrade coveralls
+          coveralls --service=github --finish
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
