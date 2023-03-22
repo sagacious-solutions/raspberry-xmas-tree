@@ -1,5 +1,6 @@
 
 ![CI Pipeline](https://github.com/sagacious-solutions/rgb-everywhere-hardware-api/actions/workflows/python-app.yml/badge.svg)
+<a href='https://coveralls.io/github/sagacious-solutions/rgb-everywhere-hardware-api?branch=main'><img src='https://coveralls.io/repos/github/sagacious-solutions/rgb-everywhere-hardware-api/badge.svg?branch=main' alt='Coverage Status' /></a>
 
 # RGB Everywhere Hardware API
 
