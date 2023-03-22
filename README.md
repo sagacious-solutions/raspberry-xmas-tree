@@ -1,3 +1,6 @@
+
+![CI Pipeline](https://github.com/sagacious-solutions/rgb-everywhere-hardware-api/actions/workflows/python-app.yml/badge.svg)
+
 # RGB Everywhere Hardware API
 
 This is a repository for lighting device drivers for RGB Everywhere. It allows a raspberry pi to control a WS281x lighting device. An unlimited number of these can be deployed and controlled via the <a href="https://github.com/sagacious-solutions/rgb-everywhere-web-interface">RGB Everywhere Web Interface</a>
