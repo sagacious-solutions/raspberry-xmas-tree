@@ -10,9 +10,6 @@ def write_config_to_file(config: dict, filename: str = "config.ini"):
         config (dict): Dictionary holding values for device configuration
         filename (str, optional): filename to hold config in. Defaults to "config.ini".
     """
-
-    
-
     config_json = json.dumps(config, indent=4)
     with open(filename, "w") as config_file:
         config_file.write(config_json)
