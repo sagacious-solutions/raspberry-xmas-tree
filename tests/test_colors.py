@@ -1,5 +1,4 @@
 from classes.LedColor import LedColor
-from rpi_ws281x import Color
 
 
 def test_interpolate_rgb_val_1_0():
