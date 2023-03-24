@@ -1,5 +1,4 @@
 from typing import List
-import time
 
 from flask import Flask, request
 from flask import Response as FlaskResponse

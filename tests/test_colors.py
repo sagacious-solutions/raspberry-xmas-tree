@@ -22,3 +22,24 @@ def test_interpolate_rgb_half():
     EXPECTED_VALUE_HALF = [128, 128, 128]
 
     assert ACTUAL_VALUE_HALF == EXPECTED_VALUE_HALF
+
+
+def test_can_get_color_as_list():
+    ACTUAL_VALUE = LedColor.get_rgb_value(LedColor.lightOrange)
+    EXPECTED_RETURN_VALUE = [180, 45, 0]
+
+    assert ACTUAL_VALUE == EXPECTED_RETURN_VALUE
+
+
+def test_can_convert_list_to_color():
+    ACTUAL_VALUE = LedColor.rgb([180, 45, 0])
+    EXPECTED_RETURN_VALUE = LedColor.lightOrange
+
+    assert ACTUAL_VALUE == EXPECTED_RETURN_VALUE
+
+
+def test_can_get_random_color():
+    """Checks to make sure it can get a random color. Colors should be an int value."""
+    ACTUAL = LedColor.get_random()
+    
+    assert type(ACTUAL) == int

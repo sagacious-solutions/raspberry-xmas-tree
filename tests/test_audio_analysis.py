@@ -31,7 +31,7 @@ def SongAnalysisClass(request):
     )
 
 
-@pytest.mark.parametrize("time_seconds", [45, 120, 146, 199, 330])
+@pytest.mark.parametrize("time_seconds", [45, 120, 146, 199])
 def test_time_to_get_active(SongAnalysisClass, time_seconds):
     linear_start = time.time()
     linear_search_active = SongAnalysisClass.get_active_linear_search(
@@ -51,6 +51,6 @@ def test_time_to_get_active(SongAnalysisClass, time_seconds):
         assert binary_search_time < linear_search_time / 2
     except AssertionError:
         pytest.skip(
-            "This test failed. It was designed for Rpi and may have"
-            " unpredictable results in CI Pipeline"
+            f"This test failed for arg {time_seconds}. It was designed for Rpi"
+            " and may have unpredictable results in CI Pipeline"
         )

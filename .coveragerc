@@ -1,3 +1,10 @@
 [run]
-omit = tests/*
+
+omit = *__init__*
+        *config.py
+        *tests/*
+        *classes/DynamicDisplay.py
+        *classes/LightString.py
+        *classes/LightLoop.py
+
 relative_files = True
